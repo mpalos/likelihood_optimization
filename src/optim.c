@@ -546,19 +546,28 @@ int main(int argc, char **argv) {
 
 	char method = 'B';
 	char model = 'A';
-	//char model = 'B';
 
 	//NEW: Use getopt()
+	//TODO make some options mandatory
 	int flagArgs = 0;
 	int opt;
 	while ((opt = getopt(argc, argv, "o:p:s:c:t:m:z:i:d:h:")) != -1) {
 		switch (opt) {
 		//File Parameters
 		case 'd':
-			model = optarg[0];
+			if(strcmp(optarg,"model_A") == 0){ model = 'A';	}
+			else if(strcmp(optarg,"model_B") == 0){	model = 'B'; }
+			else if(strcmp(optarg,"model_C") == 0){	model = 'C'; }
+			// TODO error if not provide the correct model
 			break;
 		case 'h':
-			method = optarg[0];
+			if(strcmp(optarg,"bfgs") == 0){ method = 'B';	}
+			else if(strcmp(optarg,"simplex") == 0){	method = 'S'; }
+			else if(strcmp(optarg,"conj_pr") == 0){ method = 'P';}
+			else if(strcmp(optarg,"conj_fr") == 0){ method = 'F';}
+			else if(strcmp(optarg,"steep_desc") == 0){ method = 'D';}
+			// TODO Include MCMC
+			// TODO error if not provide the correct method
 			break;
 		case 'o': //
 			obsFile = optarg;
@@ -623,7 +632,7 @@ int main(int argc, char **argv) {
 			break;
 		default:
 			fprintf(stderr,
-					"Usage: %s -d model(A,B,C) -h method(B,S,M) -o obsFile -s startPointFile startPointID -p paramFile paramID -c constFile constID"
+					"Usage: %s -d model(model_A, model_B, model_C) -h method(bfgs, simplex) -o obsFile -s startPointFile startPointID -p paramFile paramID -c constFile constID"
 							" [-t tol(cubature)] [-m maxEval (cubature)] [-z zero(cubature)] [-i SInfVal(cubature)]\n",
 					argv[0]);
 			return EXIT_FAILURE;
@@ -633,7 +642,7 @@ int main(int argc, char **argv) {
 	//Verify if generate any errors reading the arguments
 	if (flagArgs == 1) {
 		fprintf(stderr,
-				"Usage: %s -o obsFile -s startPointFile startPointID -p paramFile paramID -c constFile constID"
+				"Usage: %s -d model(model_A, model_B, model_C) -h method(bfgs, simplex) -o obsFile -s startPointFile startPointID -p paramFile paramID -c constFile constID"
 						" [-t tol(cubature)] [-m maxEval (cubature)] [-z zero(cubature)] [-i SInfVal(cubature)]\n",
 				argv[0]);
 		return EXIT_FAILURE;
@@ -695,6 +704,22 @@ int main(int argc, char **argv) {
 		optim_lnL_simplex(Tfmin, &par, &x.vector);
 	}
 
+	else if (method == 'P'){
+		Tfdfmin = gsl_multimin_fdfminimizer_conjugate_pr;
+		optim_lnL_derivatives(Tfdfmin, &par, &x.vector);
+	}
+
+	else if (method == 'F'){
+		Tfdfmin = gsl_multimin_fdfminimizer_conjugate_fr;
+		optim_lnL_derivatives(Tfdfmin, &par, &x.vector);
+	}
+
+	else if (method == 'D'){
+		Tfdfmin = gsl_multimin_fdfminimizer_steepest_descent;
+		optim_lnL_derivatives(Tfdfmin, &par, &x.vector);
+	}
+
+
 	return EXIT_SUCCESS;
 }
 
@@ -716,7 +741,7 @@ void readObsData(char *paramsfile) {
 	} else {
 		filein = fopen(paramsfile, "r");
 		if (filein == NULL ) {
-			handle_error("fopen");
+			handle_error("obs - fopen");
 		}
 	}
 
@@ -762,7 +787,7 @@ void readObsData(char *paramsfile) {
 	} else {
 		filein = fopen(paramsfile, "r");
 		if (filein == NULL ) {
-			handle_error("fopen");
+			handle_error("obs - fopen");
 		}
 	}
 
@@ -827,7 +852,7 @@ void readStartPoints(char *paramsfile, int startPointIn, char model) {
 	} else {
 		filein = fopen(paramsfile, "r");
 		if (filein == NULL ) {
-			handle_error("fopen");
+			handle_error("startPoint - fopen");
 		}
 	}
 
@@ -902,7 +927,7 @@ void readParams(char *paramsfile, int nParamIn, char model, char method) {
 	int pp; 	//temporary store data
 	int j;
 
-	if(method == 'B'){
+	if(method == 'B' || method == 'P' || method == 'F' || method == 'D'){
 		nParamModelMethod = 6;
 	}
 
@@ -923,7 +948,7 @@ void readParams(char *paramsfile, int nParamIn, char model, char method) {
 	} else {
 		filein = fopen(paramsfile, "r");
 		if (filein == NULL ) {
-			handle_error("fopen");
+			handle_error("paramsfile - fopen");
 		}
 	}
 
@@ -952,7 +977,7 @@ void readParams(char *paramsfile, int nParamIn, char model, char method) {
 		if (temp[0] == nParamIn) {
 			nParam = temp[0];
 
-			if(method == 'B'){ // from BFGS method
+			if(method == 'B' || method == 'P' || method == 'F' || method == 'D'){ // from BFGS method
 				epsabs = temp[1];
 				step_size = temp[2];
 				tol = temp[3];
@@ -1021,7 +1046,7 @@ void readConst(char *paramsfile, int nConstIn) {
 	} else {
 		filein = fopen(paramsfile, "r");
 		if (filein == NULL ) {
-			handle_error("fopen");
+			handle_error("constFile - fopen");
 		}
 	}
 
