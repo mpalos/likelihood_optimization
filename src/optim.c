@@ -549,16 +549,23 @@ int main(int argc, char **argv) {
 
 	//NEW: Use getopt()
 	//TODO make some options mandatory
-	int flagArgs = 0;
+	int dflag = 0, hflag = 0, oflag = 0, sflag = 0, pflag = 0, cflag = 0; //flags for each required options
+	int flagArgs = 0; //global flag
 	int opt;
 	while ((opt = getopt(argc, argv, "o:p:s:c:t:m:z:i:d:h:")) != -1) {
 		switch (opt) {
-		//File Parameters
+		//File Parameters (required)
 		case 'd':
 			if(strcmp(optarg,"model_A") == 0){ model = 'A';	}
 			else if(strcmp(optarg,"model_B") == 0){	model = 'B'; }
 			else if(strcmp(optarg,"model_C") == 0){	model = 'C'; }
-			// TODO error if not provide the correct model
+			else {
+				fprintf(stderr,
+					"\nInvalid argument '%s': -d' option requires one of these arguments: model_A, model_B, model_C \n\n",optarg);
+				//usage();
+				flagArgs = 1;
+			}
+			dflag = 1;
 			break;
 		case 'h':
 			if(strcmp(optarg,"bfgs") == 0){ method = 'B';	}
@@ -567,10 +574,17 @@ int main(int argc, char **argv) {
 			else if(strcmp(optarg,"conj_fr") == 0){ method = 'F';}
 			else if(strcmp(optarg,"steep_desc") == 0){ method = 'D';}
 			// TODO Include MCMC
-			// TODO error if not provide the correct method
+			else {
+				fprintf(stderr,
+					"\nInvalid argument '%s': -h' option requires one of these arguments: bfgs, simplex, conj_pr, conj_fr, steep_desc \n\n",optarg);
+				//usage();
+				flagArgs = 1;
+			}
+			hflag = 1;
 			break;
 		case 'o': //
 			obsFile = optarg;
+			oflag = 1;
 			break;
 		case 's': //
 			startFile = optarg;
@@ -580,12 +594,12 @@ int main(int argc, char **argv) {
 				optind++;
 			} else {
 				fprintf(stderr,
-						"\n-s option requires TWO arguments <startPointFile> "
+						"\n'-s' option requires TWO arguments <startPointFile> "
 								"<startPointID>\n\n");
 				//usage();
 				flagArgs = 1;
 			}
-
+			sflag = 1;
 			break;
 		case 'p': //
 			paramFile = optarg;
@@ -595,12 +609,12 @@ int main(int argc, char **argv) {
 				optind++;
 			} else {
 				fprintf(stderr,
-						"\n-p option requires TWO arguments <paramFile> "
+						"\n'-p' option requires TWO arguments <paramFile> "
 								"<paramID>\n\n");
 				//usage();
 				flagArgs = 1;
 			}
-
+			pflag = 1;
 			break;
 		case 'c': //
 			constFile = optarg;
@@ -610,14 +624,14 @@ int main(int argc, char **argv) {
 				optind++;
 			} else {
 				fprintf(stderr,
-						"\n-c option requires TWO arguments <constFile> "
+						"\n'-c' option requires TWO arguments <constFile> "
 								"<constID>\n\n");
 				//usage();
 				flagArgs = 1;
 			}
-
+			cflag = 1;
 			break;
-			//Cubature parameters:
+			//Cubature parameters (optional):
 		case 't': //
 			cubTol = atof(optarg);
 			break;
@@ -632,17 +646,24 @@ int main(int argc, char **argv) {
 			break;
 		default:
 			fprintf(stderr,
-					"Usage: %s -d model(model_A, model_B, model_C) -h method(bfgs, simplex) -o obsFile -s startPointFile startPointID -p paramFile paramID -c constFile constID"
+					"Usage: %s -d model(model_A, model_B, model_C) -h method(bfgs, simplex, conj_pr, conj_fr, steep_desc) -o obsFile -s startPointFile startPointID -p paramFile paramID -c constFile constID"
 							" [-t tol(cubature)] [-m maxEval (cubature)] [-z zero(cubature)] [-i SInfVal(cubature)]\n",
 					argv[0]);
 			return EXIT_FAILURE;
 		}
 	}
 
-	//Verify if generate any errors reading the arguments
+	//Verify and generate any errors reading the arguments
+	if(dflag == 0){ fprintf(stderr,"\nOption '-d' missing\n\n"); flagArgs = 1;}
+	if(hflag == 0){ fprintf(stderr,"\nOption '-h' missing\n\n"); flagArgs = 1;}
+	if(oflag == 0){ fprintf(stderr,"\nOption '-o' missing\n\n"); flagArgs = 1;}
+	if(sflag == 0){ fprintf(stderr,"\nOption '-s' missing\n\n"); flagArgs = 1;}
+	if(pflag == 0){ fprintf(stderr,"\nOption '-p' missing\n\n"); flagArgs = 1;}
+	if(cflag == 0){ fprintf(stderr,"\nOption '-c' missing\n\n"); flagArgs = 1;}
+
 	if (flagArgs == 1) {
 		fprintf(stderr,
-				"Usage: %s -d model(model_A, model_B, model_C) -h method(bfgs, simplex) -o obsFile -s startPointFile startPointID -p paramFile paramID -c constFile constID"
+				"Usage: %s -d model(model_A, model_B, model_C) -h method(bfgs, simplex, conj_pr, conj_fr, steep_desc) -o obsFile -s startPointFile startPointID -p paramFile paramID -c constFile constID"
 						" [-t tol(cubature)] [-m maxEval (cubature)] [-z zero(cubature)] [-i SInfVal(cubature)]\n",
 				argv[0]);
 		return EXIT_FAILURE;
