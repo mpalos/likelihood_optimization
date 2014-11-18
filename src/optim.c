@@ -1,8 +1,5 @@
 /*
  * TODO Include verbose levels
- * TODO Create new method parameters:
- * 	- bfgs: MAXITER, MAXSAME
- * 	- simplex: MAXITER,
  *
  */
 
@@ -26,6 +23,9 @@
 /******************************************************************************************/
 /* FUNCTION PROTOTYPES */
 /******************************************************************************************/
+void printResult(char model, int start, long obs, int iter,
+		gsl_vector * xVal, double lik, double grdSizeAcc,
+		int status);
 void readStartPoints(char *paramsfile, int startPointIn, char model);
 void readParams(char *paramsfile, int nParamIn, char model, char method);
 void readObsData(char *paramsfile);
@@ -57,6 +57,30 @@ int startPoint = -1;
 double *x_params = NULL;
 int nParam = -1;
 int nRerun = 0;
+
+void printResult(char model, int start, long obs, int iter,
+		gsl_vector * xVal, double lik, double grdSizeAcc,
+		int status){
+
+	  printf("%d;",start);
+	  printf("%ld;",obs);
+	  printf("%d;",iter);
+	  printf("%.20f;",exp(gsl_vector_get(xVal, 0)));
+	  printf("%.20f;",exp(gsl_vector_get(xVal, 1)));
+	  printf("%.20f;",exp(gsl_vector_get(xVal, 2)));
+	  printf("%.20f;",gsl_vector_get(xVal, 3));
+	  printf("%.20f;",gsl_vector_get(xVal, 4));
+	  if(model == 'B' || model == 'C'){
+		  printf("%.20f;",1 / (1 + exp(-1*gsl_vector_get (xVal, 5))));
+		  printf("%.20f;",exp(gsl_vector_get (xVal, 6)));
+	  }
+	  printf("%.20f;",exp(gsl_vector_get(xVal, 7)));
+	  printf("%.20f;",exp(gsl_vector_get(xVal, 8)));
+	  printf("%.20f;", lik);
+	  printf("%.20f;",grdSizeAcc);
+	  printf("%d\n",status);
+
+}
 
 double lnL_f(const gsl_vector * x, void *params) {
 
@@ -224,23 +248,7 @@ int optim_lnL_derivatives(const gsl_multimin_fdfminimizer_type *T, void *params,
 					+ pow(gsl_vector_get(s->gradient, 6), n_dim);
 	  }
 
-	  printf("%d;",startPoint);
-	  printf("%ld;",nData);
-	  printf("%d;",iter);
-	  printf("%.20f;",exp(gsl_vector_get(s->x, 0)));
-	  printf("%.20f;",exp(gsl_vector_get(s->x, 1)));
-	  printf("%.20f;",exp(gsl_vector_get(s->x, 2)));
-	  printf("%.20f;",gsl_vector_get(s->x, 3));
-	  printf("%.20f;",gsl_vector_get(s->x, 4));
-	  if(model == 'B' || model == 'C'){
-		  printf("%.20f;",1 / (1 + exp(-1*gsl_vector_get (s->x, 5))));
-		  printf("%.20f;",exp(gsl_vector_get (s->x, 6)));
-	  }
-	  printf("%.20f;",exp(gsl_vector_get(s->x, 7)));
-	  printf("%.20f;",exp(gsl_vector_get(s->x, 8)));
-	  printf("%.20f;", s->f);
-	  printf("%.20f;",pow(mod_grad, 1.0 / n_dim));
-	  printf("-2\n");
+	  printResult(model,startPoint,nData,iter,s->x,s->f,pow(mod_grad, 1.0 / n_dim),-2);
 
 	gsl_vector_memcpy(prev, x);
 
@@ -254,23 +262,7 @@ int optim_lnL_derivatives(const gsl_multimin_fdfminimizer_type *T, void *params,
 			//	printf("ERROR #%d: iteration is not making progress towards solution\n",status);
 			//}
 
-			  printf("%d;",startPoint);
-			  printf("%ld;",nData);
-			  printf("%d;",iter);
-			  printf("%.20f;",exp(gsl_vector_get(s->x, 0)));
-			  printf("%.20f;",exp(gsl_vector_get(s->x, 1)));
-			  printf("%.20f;",exp(gsl_vector_get(s->x, 2)));
-			  printf("%.20f;",gsl_vector_get(s->x, 3));
-			  printf("%.20f;",gsl_vector_get(s->x, 4));
-			  if(model == 'B' || model == 'C'){
-				  printf("%.20f;",1 / (1 + exp(-1*gsl_vector_get (s->x, 5))));
-				  printf("%.20f;",exp(gsl_vector_get (s->x, 6)));
-			  }
-			  printf("%.20f;",exp(gsl_vector_get(s->x, 7)));
-			  printf("%.20f;",exp(gsl_vector_get(s->x, 8)));
-			  printf("%.20f;", s->f);
-			  printf("%.20f;",pow(mod_grad, 1.0 / n_dim));
-			  printf("%d\n",status);
+			printResult(model,startPoint,nData,iter,s->x,s->f,pow(mod_grad, 1.0 / n_dim),status);
 
 			break;
 		}
@@ -294,47 +286,14 @@ int optim_lnL_derivatives(const gsl_multimin_fdfminimizer_type *T, void *params,
 						+ pow(gsl_vector_get(s->gradient, 6), n_dim);
 		  }
 
-		  printf("%d;",startPoint);
-		  printf("%ld;",nData);
-		  printf("%d;",iter);
-		  printf("%.20f;",exp(gsl_vector_get(s->x, 0)));
-		  printf("%.20f;",exp(gsl_vector_get(s->x, 1)));
-		  printf("%.20f;",exp(gsl_vector_get(s->x, 2)));
-		  printf("%.20f;",gsl_vector_get(s->x, 3));
-		  printf("%.20f;",gsl_vector_get(s->x, 4));
-		  if(model == 'B' || model == 'C'){
-			  printf("%.20f;",1 / (1 + exp(-1*gsl_vector_get (s->x, 5))));
-			  printf("%.20f;",exp(gsl_vector_get (s->x, 6)));
-		  }
-		  printf("%.20f;",exp(gsl_vector_get(s->x, 7)));
-		  printf("%.20f;",exp(gsl_vector_get(s->x, 8)));
-		  printf("%.20f;", s->f);
-		  printf("%.20f;",pow(mod_grad, 1.0 / n_dim));
-		  printf("%d\n",status);
+		  printResult(model,startPoint,nData,iter,s->x,s->f,pow(mod_grad, 1.0 / n_dim),status);
 
 		  //TEST IF THE ITERATION STUCKS ON SAME ANSWER AFTER maxSame TIMES
 		  if(gsl_vector_equal(prev,s->x)){ countSame++; }
 		  else { countSame =0;}
 
 		  if(countSame >= maxSame){
-			  printf("%d;",startPoint);
-			  printf("%ld;",nData);
-			  printf("%d;",iter);
-			  printf("%.20f;",exp(gsl_vector_get(s->x, 0)));
-			  printf("%.20f;",exp(gsl_vector_get(s->x, 1)));
-			  printf("%.20f;",exp(gsl_vector_get(s->x, 2)));
-			  printf("%.20f;",gsl_vector_get(s->x, 3));
-			  printf("%.20f;",gsl_vector_get(s->x, 4));
-			  if(model == 'B' || model == 'C'){
-				  printf("%.20f;",1 / (1 + exp(-1*gsl_vector_get (s->x, 5))));
-				  printf("%.20f;",exp(gsl_vector_get (s->x, 6)));
-			  }
-			  printf("%.20f;",exp(gsl_vector_get(s->x, 7)));
-			  printf("%.20f;",exp(gsl_vector_get(s->x, 8)));
-			  printf("%.20f;", s->f);
-			  printf("%.20f;",pow(mod_grad, 1.0 / n_dim));
-			  printf("27\n");
-
+			  printResult(model,startPoint,nData,iter,s->x,s->f,pow(mod_grad, 1.0 / n_dim),27);
 			  break;
 			}
 
@@ -344,23 +303,7 @@ int optim_lnL_derivatives(const gsl_multimin_fdfminimizer_type *T, void *params,
 
 	//VERIFY IF AFTER maxIter ITERATIONS IT COULDN'T FIND SOLUTION
 	if (iter >= maxIter) {
-		  printf("%d;",startPoint);
-		  printf("%ld;",nData);
-		  printf("%d;",iter);
-		  printf("%.20f;",exp(gsl_vector_get(s->x, 0)));
-		  printf("%.20f;",exp(gsl_vector_get(s->x, 1)));
-		  printf("%.20f;",exp(gsl_vector_get(s->x, 2)));
-		  printf("%.20f;",gsl_vector_get(s->x, 3));
-		  printf("%.20f;",gsl_vector_get(s->x, 4));
-		  if(model == 'B' || model == 'C'){
-			  printf("%.20f;",1 / (1 + exp(-1*gsl_vector_get (s->x, 5))));
-			  printf("%.20f;",exp(gsl_vector_get (s->x, 6)));
-		  }
-		  printf("%.20f;",exp(gsl_vector_get(s->x, 7)));
-		  printf("%.20f;",exp(gsl_vector_get(s->x, 8)));
-		  printf("%.20f;", s->f);
-		  printf("%.20f;",pow(mod_grad, 1.0 / n_dim));
-		  printf("27\n");
+		printResult(model,startPoint,nData,iter,s->x,s->f,pow(mod_grad, 1.0 / n_dim),27);
 	}
 
 	gsl_multimin_fdfminimizer_free(s);
@@ -408,23 +351,7 @@ int optim_lnL_simplex(const gsl_multimin_fminimizer_type *T, void *params, gsl_v
 
 	  //PRINT START POINT
 	  size = gsl_multimin_fminimizer_size (s);
-	  printf("%d;",startPoint);
-	  printf("%ld;",nData);
-	  printf("%d;",iter);
-	  printf("%.20f;",exp(gsl_vector_get (s->x, 0)));
-	  printf("%.20f;",exp(gsl_vector_get (s->x, 1)));
-	  printf("%.20f;",exp(gsl_vector_get (s->x, 2)));
-	  printf("%.20f;",gsl_vector_get (s->x, 3));
-	  printf("%.20f;",gsl_vector_get (s->x, 4));
-	  if(model == 'B' || model == 'C'){
-		  printf("%.20f;",1 / (1 + exp(-1*gsl_vector_get (s->x, 5))));
-		  printf("%.20f;",exp(gsl_vector_get (s->x, 6)));
-	  }
-	  printf("%.20f;",exp(gsl_vector_get (s->x, 7)));
-	  printf("%.20f;",exp(gsl_vector_get (s->x, 8)));
-	  printf("%.20f;",lnL_f(x,params));
-	  printf("%.20f;",size);
-	  printf("-2\n");
+	  printResult(model,startPoint,nData,iter,s->x,lnL_f(x,params),size,-2);
 
 	  gsl_set_error_handler_off();
 
@@ -442,31 +369,14 @@ int optim_lnL_simplex(const gsl_multimin_fminimizer_type *T, void *params, gsl_v
 					if(var!=nRerun){
 						status = status + (100 * (nRerun - var)); // To indicate intermediate execs
 					}
+					printResult(model,startPoint,nData,iter,s->x,s->fval,size,status);
 
-						printf("%d;",startPoint);
-						printf("%ld;",nData);
-						printf("%d;",iter);
-						printf("%.20f;",exp(gsl_vector_get (s->x, 0)));
-						printf("%.20f;",exp(gsl_vector_get (s->x, 1)));
-						printf("%.20f;",exp(gsl_vector_get (s->x, 2)));
-						printf("%.20f;",gsl_vector_get (s->x, 3));
-						printf("%.20f;",gsl_vector_get (s->x, 4));
-						  if(model == 'B' || model == 'C'){
-							  printf("%.20f;",1 / (1 + exp(-1*gsl_vector_get (s->x, 5))));
-							  printf("%.20f;",exp(gsl_vector_get (s->x, 6)));
-						  }
-						printf("%.20f;",exp(gsl_vector_get (s->x, 7)));
-						printf("%.20f;",exp(gsl_vector_get (s->x, 8)));
-						printf("%.20f;",s->fval);
-						printf("%.20f;",size);
-						printf("%d\n",status);
+					if(var!=nRerun){ //Reset rerun
+						gsl_multimin_fminimizer_set (s, &minex_func, s->x, ss); //set the simplex again!!!
+						//iterPerRun = 0; //set iterPerRun
+					}
 
-						if(var!=nRerun){ //Reset rerun
-							gsl_multimin_fminimizer_set (s, &minex_func, s->x, ss); //set the simplex again!!!
-							//iterPerRun = 0; //set iterPerRun
-						}
-
-						break;
+					break;
 				}
 
 				size = gsl_multimin_fminimizer_size (s);
@@ -478,23 +388,7 @@ int optim_lnL_simplex(const gsl_multimin_fminimizer_type *T, void *params, gsl_v
 					//iterPerRun = 0; //set iterPerRun
 				}
 
-				printf("%d;",startPoint);
-				printf("%ld;",nData);
-				printf("%d;",iter);
-				printf("%.20f;",exp(gsl_vector_get (s->x, 0)));
-				printf("%.20f;",exp(gsl_vector_get (s->x, 1)));
-				printf("%.20f;",exp(gsl_vector_get (s->x, 2)));
-				printf("%.20f;",gsl_vector_get (s->x, 3));
-				printf("%.20f;",gsl_vector_get (s->x, 4));
-				  if(model == 'B' || model == 'C'){
-					  printf("%.20f;",1 / (1 + exp(-1*gsl_vector_get (s->x, 5))));
-					  printf("%.20f;",exp(gsl_vector_get (s->x, 6)));
-				  }
-				printf("%.20f;",exp(gsl_vector_get (s->x, 7)));
-				printf("%.20f;",exp(gsl_vector_get (s->x, 8)));
-				printf("%.20f;",s->fval);
-				printf("%.20f;",size);
-				printf("%d\n",status);
+				printResult(model,startPoint,nData,iter,s->x,s->fval,size,status);
 
 
 			  }
@@ -503,23 +397,7 @@ int optim_lnL_simplex(const gsl_multimin_fminimizer_type *T, void *params, gsl_v
 			//PRINT STATUS IF IT HAVEN'T FOUND THE SOLUTION AFTER maxIter ITERATIONS PER RUN
 			status = 27 + (100 * (nRerun - var));
 			if(iterPerRun >= maxIter){
-				printf("%d;",startPoint);
-				printf("%ld;",nData);
-				printf("%d;",iter);
-				printf("%.20f;",exp(gsl_vector_get (s->x, 0)));
-				printf("%.20f;",exp(gsl_vector_get (s->x, 1)));
-				printf("%.20f;",exp(gsl_vector_get (s->x, 2)));
-				printf("%.20f;",gsl_vector_get (s->x, 3));
-				printf("%.20f;",gsl_vector_get (s->x, 4));
-				  if(model == 'B' || model == 'C'){
-					  printf("%.20f;",1 / (1 + exp(-1*gsl_vector_get (s->x, 5))));
-					  printf("%.20f;",exp(gsl_vector_get (s->x, 6)));
-				  }
-				printf("%.20f;",exp(gsl_vector_get (s->x, 7)));
-				printf("%.20f;",exp(gsl_vector_get (s->x, 8)));
-				printf("%.20f;",s->fval);
-				printf("%.20f;",size);
-				printf("%d\n",status);
+				printResult(model,startPoint,nData,iter,s->x,s->fval,size,status);
 			}
 		}
 
