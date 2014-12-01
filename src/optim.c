@@ -425,8 +425,6 @@ int main(int argc, char **argv) {
 	char method = 'B';
 	char model = 'A';
 
-	//NEW: Use getopt()
-	//TODO make some options mandatory
 	int dflag = 0, hflag = 0, oflag = 0, sflag = 0, pflag = 0, cflag = 0; //flags for each required options
 	int flagArgs = 0; //global flag
 	int opt;
