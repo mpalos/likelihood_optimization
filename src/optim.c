@@ -122,6 +122,9 @@ double lnL_f(const gsl_vector * x, void *params) {
 		shapeMu 		= exp(gsl_vector_get(x, 8));
 	}
 
+//	/**** DEBUG ******/
+//	printf("x: %f %f %f %f %f %f %f \n",theta,lambda,r,smean,smax,shapeBeta,shapeMu);
+//	/*****************/
 
 	for (j = 0; j < ((struct params_s *) params)->nObs; j++) {
 		lnL += lnL_MKS_PhiS_PhiMu(model,
@@ -136,6 +139,30 @@ double lnL_f(const gsl_vector * x, void *params) {
 				((struct params_s *) params)->DSobs[j],
 				theta, lambda, r, smean, smax, Pb, Sb, shapeBeta, shapeMu,
 				cubTol, cubMaxEval, cubZero, cubSInf);
+
+//		/****** DEBUG *****/
+//		printf("obs: %d %d %d %d %d %d %f\n",
+//				((struct params_s *) params)->PSobs[j],
+//				((struct params_s *) params)->PNobs[j],
+//				((struct params_s *) params)->SNobs[j],
+//				((struct params_s *) params)->SSobs[j],
+//				((struct params_s *) params)->DNobs[j],
+//				((struct params_s *) params)->DSobs[j],
+//				lnL_MKS_PhiS_PhiMu(model,
+//								((struct params_s *) params)->Ln,
+//								((struct params_s *) params)->Ls,
+//								((struct params_s *) params)->n,
+//								((struct params_s *) params)->PSobs[j],
+//								((struct params_s *) params)->PNobs[j],
+//								((struct params_s *) params)->SNobs[j],
+//								((struct params_s *) params)->SSobs[j],
+//								((struct params_s *) params)->DNobs[j],
+//								((struct params_s *) params)->DSobs[j],
+//								theta, lambda, r, smean, smax, Pb, Sb, shapeBeta, shapeMu,
+//								cubTol, cubMaxEval, cubZero, cubSInf));
+//
+//		/*****************/
+
 	}
 
 	const double y = lnL * (-1);
@@ -255,6 +282,12 @@ int optim_lnL_derivatives(const gsl_multimin_fdfminimizer_type *T, void *params,
 	do {
 		iter++;
 		status = gsl_multimin_fdfminimizer_iterate(s);
+//		  /**** DEBUG *****/
+//		  printf("x: %f %f %f %f %f %f %f %f %f \n"
+//				  ,gsl_vector_get(x,0),gsl_vector_get(x,1),gsl_vector_get(x,2),gsl_vector_get(x,3)
+//				  ,gsl_vector_get(x,4),gsl_vector_get(x,5),gsl_vector_get(x,6),gsl_vector_get(x,7)
+//				  ,gsl_vector_get(x,8));
+//		  /****************/
 
 		if (status) {
 			// IF IS NECESSARY TO PRINT THE ERRORS ...
@@ -312,20 +345,17 @@ int optim_lnL_derivatives(const gsl_multimin_fdfminimizer_type *T, void *params,
 
 }
 
-int optim_lnL_simplex(const gsl_multimin_fminimizer_type *T, void *params, gsl_vector *x){
+int optim_lnL_simplex(const gsl_multimin_fminimizer_type *T, void *params, gsl_vector *x, gsl_vector *ss){
 
 	  unsigned int n = 9;
 
 	  gsl_multimin_fminimizer *s = NULL;
-	  gsl_vector *ss;
 	  gsl_multimin_function minex_func = {&lnL_f, n, params};
 
 	  unsigned int iter = 0;
 	  int status;
 	  double size = 0.0;
 	  const char model = ((struct params_s *) params)->model;
-
-	  ss = gsl_vector_alloc (9);
 
 	  //Use x_params variable
 	  gsl_vector_set(ss, 0, log(1 + (x_params[0] / exp(gsl_vector_get(x,0)))));
@@ -545,30 +575,11 @@ int main(int argc, char **argv) {
 		return EXIT_FAILURE;
 	}
 
-	//READ FILES AS ARGUMENT
-//    if (argc <= 7) {
-//	  fprintf(stderr, "Usage: %s obsFile startPointFile startPointID paramFile paramID constFile constID"
-//			  "[tol(cubature)] [maxEval (cubature)] [zero(cubature)] [SInfVal(cubature)]\n",
-//		  argv[0]);
-//	  return EXIT_FAILURE;
-//    }
-//
-//    obsFile = argv[1];
-//    startFile = argv[2];
-//    paramFile = argv[4];
-//    constFile = argv[6];
-
 	readObsData(obsFile);
 	readStartPoints(startFile, nStart,model);
 	readParams(paramFile, nParam,model,method);
 
 	readConst(constFile, nConst);
-
-	//cubature parameters:
-//	cubTol = argc > 8 ? atof(argv[8]) : 1e-5;
-//	cubMaxEval = argc > 9 ? atoi(argv[9]) : 1e4;
-//	cubZero = argc > 10 ? atof(argv[10]) : 1e-4;
-//	cubSInf = argc > 11 ? atof(argv[11]) : 500;
 
 	params par;
 	par.Ls = Ls;
@@ -597,8 +608,9 @@ int main(int argc, char **argv) {
 	}
 
 	else if (method == 'S'){
+		gsl_vector_view ss = gsl_vector_view_array(x_params, 9);
 		Tfmin = gsl_multimin_fminimizer_nmsimplex2;
-		optim_lnL_simplex(Tfmin, &par, &x.vector);
+		optim_lnL_simplex(Tfmin, &par, &x.vector, &ss.vector);
 	}
 
 	else if (method == 'P'){
@@ -684,7 +696,7 @@ void readObsData(char *paramsfile) {
 	} else {
 		filein = fopen(paramsfile, "r");
 		if (filein == NULL ) {
-			handle_error("obs - fopen");
+			handle_error(paramsfile);
 		}
 	}
 
@@ -749,7 +761,7 @@ void readStartPoints(char *paramsfile, int startPointIn, char model) {
 	} else {
 		filein = fopen(paramsfile, "r");
 		if (filein == NULL ) {
-			handle_error("startPoint - fopen");
+			handle_error(paramsfile);
 		}
 	}
 
@@ -845,7 +857,7 @@ void readParams(char *paramsfile, int nParamIn, char model, char method) {
 	} else {
 		filein = fopen(paramsfile, "r");
 		if (filein == NULL ) {
-			handle_error("paramsfile - fopen");
+			handle_error(paramsfile);
 		}
 	}
 
@@ -943,7 +955,7 @@ void readConst(char *paramsfile, int nConstIn) {
 	} else {
 		filein = fopen(paramsfile, "r");
 		if (filein == NULL ) {
-			handle_error("constFile - fopen");
+			handle_error(paramsfile);
 		}
 	}
 
