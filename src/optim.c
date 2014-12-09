@@ -18,6 +18,7 @@
 #include <sys/timeb.h>
 #include <sys/types.h>
 
+#include "fmem.h"
 #include "lnLfunctions.h"
 
 /******************************************************************************************/
@@ -425,8 +426,8 @@ int optim_lnL_simplex(const gsl_multimin_fminimizer_type *T, void *params, gsl_v
 			while (status == GSL_CONTINUE && iterPerRun < maxIter);
 
 			//PRINT STATUS IF IT HAVEN'T FOUND THE SOLUTION AFTER maxIter ITERATIONS PER RUN
-			status = 27 + (100 * (nRerun - var));
 			if(iterPerRun >= maxIter){
+				status = 27 + (100 * (nRerun - var));
 				printResult(model,startPoint,nData,iter,s->x,s->fval,size,status);
 			}
 		}
