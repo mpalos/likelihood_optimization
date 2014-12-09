@@ -4,18 +4,21 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../src/fmem.c \
 ../src/functions.c \
 ../src/hcubature.c \
 ../src/likelihood.c \
 ../src/optim.c 
 
 OBJS += \
+./src/fmem.o \
 ./src/functions.o \
 ./src/hcubature.o \
 ./src/likelihood.o \
 ./src/optim.o 
 
 C_DEPS += \
+./src/fmem.d \
 ./src/functions.d \
 ./src/hcubature.d \
 ./src/likelihood.d \

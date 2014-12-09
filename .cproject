@@ -95,7 +95,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="gsl-1_16_src|src" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry excluding="optim_BKP.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
@@ -106,16 +106,27 @@
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="likelihood_bfgs.cdt.managedbuild.target.gnu.exe.2080034498" name="Executable" projectType="cdt.managedbuild.target.gnu.exe"/>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Release">
+			<resource resourceType="PROJECT" workspacePath="/likelihood_optimization"/>
+		</configuration>
+		<configuration configurationName="make">
+			<resource resourceType="PROJECT" workspacePath="/likelihood_optimization"/>
+		</configuration>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.1634098209;cdt.managedbuild.config.gnu.exe.release.1634098209.;cdt.managedbuild.tool.gnu.c.compiler.exe.release.1016047544;cdt.managedbuild.tool.gnu.c.compiler.input.617504338">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.debug.1592103835;cdt.managedbuild.config.gnu.exe.debug.1592103835.;cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1031045289;cdt.managedbuild.tool.gnu.c.compiler.input.1527047298">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.1634098209;cdt.managedbuild.config.gnu.exe.release.1634098209.;cdt.managedbuild.tool.gnu.c.compiler.exe.release.1016047544;cdt.managedbuild.tool.gnu.c.compiler.input.617504338">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.debug.1592103835.47143604;cdt.managedbuild.config.gnu.exe.debug.1592103835.47143604.;cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1653459012;cdt.managedbuild.tool.gnu.c.compiler.input.2061720949">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
 	</storageModule>
-	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
-	<storageModule moduleId="refreshScope"/>
-	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>
